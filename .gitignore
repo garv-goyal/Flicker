@@ -52,3 +52,6 @@ warehouse/.user.yml
 
 # Airflow generated password file
 standalone_admin_password.txt
+
+# One-time migration scripts
+migrate_to_motherduck.py

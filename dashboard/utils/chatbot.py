@@ -36,7 +36,7 @@ gold.mart_buzz_vs_critics  — audience sentiment vs critic scores
   composite_score DOUBLE, tmdb_rating DOUBLE, roi_ratio DOUBLE,
   divergence DOUBLE  (pct_positive − critic_score; positive = crowd warmer)
 
-gold.mart_genre_trends  — genre performance by year
+gold.mart_genre_trends  — genre performance by year (PRE-AGGREGATED: one row per genre+year, do NOT add GROUP BY)
   primary_genre TEXT, release_year INT, film_count INT,
   avg_budget_usd DOUBLE, avg_revenue_usd DOUBLE, avg_roi DOUBLE,
   avg_tmdb_rating DOUBLE, avg_popularity DOUBLE
@@ -87,6 +87,7 @@ Rules:
      avg_tmdb_rating AS "Avg Rating"
 3. If the question needs no data (e.g. "what can you do?"), skip the SQL block.
 4. Write conversationally. Mention the most interesting insight in your text. Bold standout figures.
+5. Tables prefixed with mart_ are pre-aggregated. Query them with simple SELECT + ORDER BY + LIMIT — never add GROUP BY on mart_ tables.
 """).strip()
 
 
@@ -212,13 +213,21 @@ def _strip_html(text: str) -> str:
     return re.sub(r"<[^>]+>", " ", text).strip()
 
 
+@st.cache_resource
+def _get_client() -> genai.Client:
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        return None
+    return genai.Client(api_key=api_key)
+
+
 def _process(question: str, history: list[dict]) -> str:
     """Convert natural language → SQL → run → return HTML-safe response string.
 
     history: prior messages (role 'user'/'assistant') NOT including current question.
     """
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
+    client = _get_client()
+    if client is None:
         return '<em style="color:#F87171">GEMINI_API_KEY not set — chatbot unavailable.</em>'
 
     # Build multi-turn contents so Gemini has conversation context
@@ -229,13 +238,13 @@ def _process(question: str, history: list[dict]) -> str:
         contents.append(types.Content(role=role, parts=[types.Part(text=text)]))
     contents.append(types.Content(role="user", parts=[types.Part(text=question)]))
 
-    client = genai.Client(api_key=api_key)
     resp = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=_SYSTEM,
             max_output_tokens=512,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
     raw = resp.text

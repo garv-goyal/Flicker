@@ -1,28 +1,56 @@
-# Flicker — Entertainment Analytics Data Platform
+# Flicker - Entertainment Analytics Data Platform
 
-Ingests data from multiple entertainment sources (TMDB, OMDb, YouTube data + a
-streaming YouTube-comment buzz feed, and a simulated Postgres CDC source),
-processes it through a Medallion architecture (Bronze → Silver → Gold),
-orchestrates batch with Airflow, streams with Kafka (+ Debezium for change data
-capture), models with dbt on DuckDB/MotherDuck, and serves a polished Streamlit
-dashboard.
+A portfolio data engineering project that ingests from five sources (TMDB, OMDb,
+YouTube, a live Kafka comment stream, and a simulated Postgres CDC feed), processes
+through a Medallion architecture (Bronze → Silver → Gold), orchestrates with Airflow,
+streams with Kafka + Debezium, models with dbt on DuckDB/MotherDuck, and serves a
+Streamlit dashboard with a Text-to-SQL chatbot.
 
-**Status:** Phases 0–5 complete (ingestion, warehouse, dashboard, Airflow,
-Kafka streaming + sentiment, Debezium CDC). Remaining: Text-to-SQL chat + deploy.
+**Live dashboard →** https://flicker.streamlit.app
 
 ## Stack
-Python · TMDB/OMDb/YouTube APIs · Kafka · Debezium · Airflow · DuckDB + MotherDuck · dbt Core · VADER · Streamlit · Docker
 
-The warehouse is **DuckDB** — a local `flicker.duckdb` file holds the
-`bronze`/`silver`/`gold` schemas (no account, no card). The free **MotherDuck**
-cloud tier hosts a copy so the deployed dashboard reads from a real cloud warehouse.
+Python · TMDB / OMDb / YouTube APIs · Apache Kafka · Debezium (CDC) · Apache Airflow · DuckDB + MotherDuck · dbt Core · VADER Sentiment · Streamlit · Gemini (Text-to-SQL) · Docker
+
+## Architecture
+
+```
+APIs (TMDB, OMDb, YouTube)
+  └─ ingestion/*.py ──────────────────────────────┐
+                                                   │
+Kafka + Debezium (CDC off Postgres WAL)            ▼
+  └─ streaming/*.py ─────────────────── Bronze (DuckDB / MotherDuck)
+                                                   │
+                                              dbt Silver
+                                                   │
+                                              dbt Gold ── Streamlit dashboard
+```
+
+Batch ingestion pulls the ~2,000 most-popular films from TMDB and enriches them
+with critic scores (OMDb), trailer engagement (YouTube), and YouTube comment
+sentiment (VADER). A simulated Postgres operational database tracks each film's
+theatrical run; Debezium streams every INSERT/UPDATE/DELETE off the WAL into Kafka
+and then into the warehouse — current state is rebuilt entirely from the change
+stream, not batch snapshots.
+
+## Pages
+
+| Page | What it shows |
+|------|---------------|
+| Overview | KPIs, ROI by decade, audience sentiment vs critics scatter |
+| Critical Reception | Two-sided divergence — films audiences loved that critics panned, and vice versa |
+| Hype vs Reality | Trailer buzz vs box-office ROI; does sentiment predict returns? |
+| Genre Trends | Annual output, avg ROI, and total revenue per genre since 1990 |
+| Operations | Live theatrical run rebuilt from CDC events — current state + change feed |
+| Newsletter | Genre-personalised weekly pick (subscribe form → DuckDB) |
+| Chat | Text-to-SQL chatbot powered by Gemini — ask anything about the dataset |
 
 ## Local setup
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # then fill in your API keys
+cp .env.example .env          # fill in API keys
 python warehouse/setup_duckdb.py
 python verify_setup.py
 ```
@@ -31,18 +59,18 @@ python verify_setup.py
 
 ```bash
 python ingestion/tmdb_movies.py        # TMDB → Bronze
-python ingestion/omdb_enrich.py        # OMDb critical scores → Bronze
+python ingestion/omdb_enrich.py        # OMDb critic scores → Bronze
 python ingestion/youtube_trailers.py   # YouTube trailer stats → Bronze
 cd warehouse && dbt build --profiles-dir .
 ```
 
-## Streaming buzz (Kafka + sentiment)
+## Streaming (Kafka + sentiment)
 
 ```bash
 docker compose up -d kafka
 python streaming/youtube_comments_producer.py   # trailer comments → Kafka
-python streaming/bluesky_consumer.py             # Kafka → Bronze (source-neutral)
-python streaming/buzz_sentiment.py               # VADER score each comment → Bronze
+python streaming/bluesky_consumer.py            # Kafka → Bronze
+python streaming/buzz_sentiment.py              # VADER score comments → Bronze
 cd warehouse && dbt build --profiles-dir .
 ```
 
@@ -50,35 +78,33 @@ cd warehouse && dbt build --profiles-dir .
 
 ```bash
 docker compose up -d kafka postgres connect
-python streaming/cdc/cdc_seed.py --reset         # seed operational Postgres table
-python streaming/cdc/register_connector.py       # register Debezium connector
-python streaming/cdc/cdc_simulator.py            # mutate rows (insert/update/delete)
-python streaming/cdc/cdc_consumer.py --drain     # CDC events → Bronze
+python streaming/cdc/cdc_seed.py --reset        # seed Postgres film_lifecycle table
+python streaming/cdc/register_connector.py      # register Debezium connector
+python streaming/cdc/cdc_simulator.py           # simulate INSERT/UPDATE/DELETE
+python streaming/cdc/cdc_consumer.py --drain    # CDC events → Bronze
 cd warehouse && dbt build --profiles-dir .
 ```
 
 ## Dashboard
 
 ```bash
-streamlit run dashboard/app.py        # run from project root
+streamlit run dashboard/app.py    # run from project root
 ```
 
 ## Orchestration
 
 ```bash
-docker compose up -d --build airflow  # Airflow at http://localhost:8080
+docker compose up -d --build airflow    # Airflow at http://localhost:8080
 ```
 
-## Layout
+## Project layout
 
 ```
-ingestion/      # batch API → Bronze (TMDB, OMDb, YouTube)
-streaming/      # Kafka producers/consumers + sentiment scorer
-streaming/cdc/  # Postgres seed, Debezium connector, simulator, CDC consumer
-warehouse/      # dbt project: Bronze → Silver → Gold models
-orchestration/  # Airflow DAGs
-dashboard/      # Streamlit app (Overview, Critical, Hype, Genres, Operations)
-docker-compose.yml  # Kafka, Postgres, Debezium Connect, Airflow
+ingestion/          batch API → Bronze (TMDB, OMDb, YouTube)
+streaming/          Kafka producers/consumers + sentiment scorer
+streaming/cdc/      Postgres seed, Debezium connector, simulator, CDC consumer
+warehouse/          dbt project — models for Bronze → Silver → Gold
+orchestration/      Airflow DAGs (daily pipeline, weekly newsletter, CDC refresh)
+dashboard/          Streamlit app + utils (queries, chatbot, UI helpers)
+docker-compose.yml  Kafka, Postgres, Debezium Connect, Airflow
 ```
-
-See `FLICKER_PROJECT.md` (one level up) for the full blueprint.

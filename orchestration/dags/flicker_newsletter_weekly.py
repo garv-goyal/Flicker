@@ -34,4 +34,6 @@ with DAG(
     send_newsletter = BashOperator(
         task_id="send_newsletter",
         bash_command='cd "$FLICKER_HOME" && "$FLICKER_PY" newsletter/send_newsletter.py',
+        env={"FLICKER_USE_MOTHERDUCK": "true"},
+        append_env=True,
     )
