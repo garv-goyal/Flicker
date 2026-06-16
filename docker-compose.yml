@@ -1,0 +1,107 @@
+# Flicker — local Airflow for orchestrating the pipeline.
+# Single-node Airflow ("standalone": webserver + scheduler + triggerer) is plenty
+# for a local pipeline. The whole project is mounted at /opt/flicker so DAGs can
+# run the ingestion scripts and dbt against the shared flicker.duckdb file.
+#
+#   docker compose up -d --build      # start (first run builds the image)
+#   docker compose logs -f airflow    # watch / find the admin password
+#   open http://localhost:8080        # UI  (user: admin)
+#   docker compose down               # stop
+services:
+  # Kafka broker (KRaft mode, single node — no Zookeeper needed).
+  # Two listeners: host scripts connect on localhost:9092 (PLAINTEXT_HOST);
+  # other containers (Debezium Connect) connect on kafka:29092 (PLAINTEXT).
+  #   docker compose up -d kafka
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: flicker-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    restart: unless-stopped
+
+  # Postgres — the simulated OPERATIONAL database (a film's live theatrical run).
+  # wal_level=logical enables the logical decoding that Debezium reads for CDC.
+  #   docker compose up -d postgres
+  postgres:
+    image: postgres:16
+    container_name: flicker-postgres
+    environment:
+      POSTGRES_USER: flicker
+      POSTGRES_PASSWORD: flicker
+      POSTGRES_DB: flicker_ops
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_wal_senders=4"
+      - "-c"
+      - "max_replication_slots=4"
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flicker -d flicker_ops"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # Debezium / Kafka Connect — reads Postgres' WAL via the pgoutput logical
+  # decoding plugin and streams every row change to Kafka as a CDC event.
+  # REST API on :8083 (register the connector with streaming/cdc/register_connector.py).
+  #   docker compose up -d connect
+  connect:
+    image: quay.io/debezium/connect:3.5
+    container_name: flicker-connect
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: flicker-connect
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+
+  airflow:
+    build:
+      context: .
+      dockerfile: orchestration/Dockerfile
+    container_name: flicker-airflow
+    command: standalone
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      # paths the DAGs use to reach the project + its isolated venv
+      FLICKER_HOME: /opt/flicker
+      FLICKER_PY: /opt/flicker-venv/bin/python
+      FLICKER_DBT: /opt/flicker-venv/bin/dbt
+    volumes:
+      - ./orchestration/dags:/opt/airflow/dags
+      - ./orchestration/logs:/opt/airflow/logs
+      - ./:/opt/flicker
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

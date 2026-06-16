@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Raw data landed by the ingestion scripts, exactly as received."
+    schema: bronze
+    tables:
+      - name: raw_tmdb_movies
+        description: "Raw TMDB movie details, one row per tmdb_id (upserted)."
+        loaded_at_field: _loaded_at
+      - name: raw_omdb_enrichment
+        description: "OMDb critical scores, box office, and awards (raw strings)."
+        loaded_at_field: _loaded_at
+      - name: raw_youtube_trailer_stats
+        description: "YouTube trailer engagement snapshot per film."
+        loaded_at_field: _loaded_at
+      - name: raw_buzz_events
+        description: "Streaming buzz events (YouTube trailer comments) via Kafka."
+        loaded_at_field: ingested_at
+      - name: raw_buzz_sentiment
+        description: "VADER sentiment score per buzz event (compound + label)."
+        loaded_at_field: scored_at
+      - name: raw_cdc_film_lifecycle
+        description: "Debezium CDC change events (insert/update/delete/snapshot) for the operational film_lifecycle table."
+        loaded_at_field: ingested_at

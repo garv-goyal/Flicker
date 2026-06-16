@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_movies
+    description: "Cleaned, typed movie records — one row per movie_id."
+    columns:
+      - name: movie_id
+        description: "TMDB id (primary key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: title
+        data_tests:
+          - not_null
+      - name: tmdb_rating
+        description: "TMDB vote average, 0–10."
+      - name: release_year
+        data_tests:
+          - not_null
+
+  - name: stg_enrichment
+    description: "Parsed OMDb critical scores, box office, and awards."
+    columns:
+      - name: imdb_id
+        data_tests: [unique, not_null]
+      - name: rt_score
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+      - name: metacritic_score
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+  - name: stg_trailer_engagement
+    description: "YouTube trailer engagement per film."
+    columns:
+      - name: tmdb_id
+        data_tests: [unique, not_null]
+
+  - name: stg_buzz
+    description: "Cleaned streaming buzz events (one row per event)."
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: tmdb_id
+        data_tests: [not_null]
+
+  - name: stg_film_lifecycle
+    description: "Cleaned CDC change events from the operational film_lifecycle table."
+    columns:
+      - name: change_id
+        data_tests: [unique, not_null]
+      - name: op_label
+        data_tests:
+          - accepted_values:
+              values: ["insert", "update", "delete", "snapshot"]

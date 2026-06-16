@@ -1,0 +1,39 @@
+# Flicker — Python dependencies (versions verified latest stable on PyPI, Jun 2026)
+# Python 3.12 recommended.
+
+# --- Ingestion (batch) ---
+requests==2.34.2
+praw==8.0.0
+google-api-python-client==2.197.0
+
+# --- Warehouse / DuckDB (local file + MotherDuck cloud, both free, no card) ---
+duckdb==1.5.3
+
+# --- dbt (transformations) ---
+dbt-core==1.11.11
+dbt-duckdb==1.10.1
+
+# --- Streaming / Spark (needs Java 17+) ---
+pyspark==4.1.2
+kafka-python==3.0.0
+confluent-kafka==2.14.2
+websockets==16.0
+
+# --- Dashboard ---
+streamlit==1.58.0
+plotly==6.8.0
+pandas==2.3.3   # pinned to latest 2.x for broad ecosystem stability (pandas 3.0 still very new)
+
+# --- NLP / sentiment (buzz enrichment) ---
+vaderSentiment==3.3.2   # rule-based sentiment for short social text (local, free)
+
+# --- Newsletter ---
+resend==2.30.1
+
+# --- Text-to-SQL ---
+google-genai
+
+# --- Data simulation / utilities ---
+faker==40.23.0
+python-dotenv==1.2.2
+psycopg2-binary==2.9.12

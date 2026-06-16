@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Secrets / env
+.env
+*.pem
+profiles.yml
+
+# DuckDB local warehouse
+*.duckdb
+*.duckdb.wal
+
+# dbt
+warehouse/target/
+warehouse/dbt_packages/
+warehouse/logs/
+
+# Airflow
+orchestration/logs/
+airflow.db
+airflow.cfg
+webserver_config.py
+
+# Spark / Kafka
+spark-warehouse/
+*.crc
+
+# Data dumps
+*.csv
+*.parquet
+data/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Claude Code
+CLAUDE.md
+.claude/
+
+# Streamlit secrets (keep config.toml, ignore secrets.toml)
+.streamlit/secrets.toml
+
+# dbt per-user config
+warehouse/.user.yml
+
+# Airflow generated password file
+standalone_admin_password.txt

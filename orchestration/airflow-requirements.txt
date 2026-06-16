@@ -1,0 +1,9 @@
+# Flicker runtime deps installed into an isolated venv inside the Airflow image,
+# so they never conflict with Airflow's own pinned dependencies.
+duckdb==1.5.3
+dbt-duckdb==1.10.1
+requests==2.34.2
+praw==8.0.0
+google-api-python-client==2.197.0
+pandas==2.3.3
+python-dotenv==1.2.2

@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: dim_date
+    columns:
+      - name: date_key
+        data_tests: [unique, not_null]
+
+  - name: dim_titles
+    columns:
+      - name: title_key
+        data_tests: [unique, not_null]
+      - name: tmdb_id
+        data_tests: [unique, not_null]
+
+  - name: fact_title_performance
+    columns:
+      - name: title_key
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_titles')
+              field: title_key
+      - name: release_date_key
+        data_tests:
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+
+  - name: mart_genre_trends
+    columns:
+      - name: film_count
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 1
+
+  - name: mart_roi_by_decade
+    columns:
+      - name: release_decade
+        data_tests: [unique, not_null]
+
+  - name: mart_hype_vs_revenue
+    columns:
+      - name: outcome_label
+        data_tests:
+          - accepted_values:
+              values: ["Overhyped", "Hidden gem", "Delivered", "Overlooked"]
+
+  - name: mart_film_buzz
+    columns:
+      - name: tmdb_id
+        data_tests: [unique, not_null]
+      - name: pct_positive
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+  - name: mart_buzz_vs_critics
+    columns:
+      - name: tmdb_id
+        data_tests: [unique, not_null]
+      - name: critic_score
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+
+  - name: mart_film_lifecycle_current
+    columns:
+      - name: tmdb_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              values: ["Now Playing", "Holdover", "Leaving Soon", "Ended"]
