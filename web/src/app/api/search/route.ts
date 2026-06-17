@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { searchFilms } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";

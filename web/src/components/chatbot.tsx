@@ -12,7 +12,7 @@ const SUGGESTIONS = [
   "Which films are leaving theaters soon?",
   "Top 5 genres by average ROI",
   "Where do audiences and critics disagree most?",
-  "Best hidden gems in the dataset",
+  "Best hidden gems right now",
 ];
 
 export default function Chatbot() {
@@ -89,13 +89,15 @@ export default function Chatbot() {
           bottom: "24px",
           right: "24px",
           zIndex: 300,
-          width: "52px",
-          height: "52px",
+          width: "56px",
+          height: "56px",
           borderRadius: "50%",
           border: "none",
           cursor: "pointer",
-          background: "var(--accent)",
-          boxShadow: "0 4px 20px rgba(0,212,255,0.35), 0 0 0 1px rgba(0,0,0,0.25)",
+          background: "linear-gradient(145deg, var(--accent), #00a3c4)",
+          boxShadow: open
+            ? "0 4px 20px rgba(0,212,255,0.3), 0 0 0 1px rgba(0,0,0,0.25)"
+            : "0 4px 20px rgba(0,212,255,0.4), 0 0 0 1px rgba(0,0,0,0.25), 0 0 0 5px rgba(0,212,255,0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -110,16 +112,16 @@ export default function Chatbot() {
         }}
       >
         {open ? (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-            <circle cx="8" cy="11" r="1" fill="#060810" />
-            <circle cx="12" cy="11" r="1" fill="#060810" />
-            <circle cx="16" cy="11" r="1" fill="#060810" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3c-4.97 0-9 3.5-9 7.8 0 2.45 1.27 4.63 3.28 6.08-.1.97-.46 2.2-1.4 3.4a.5.5 0 00.5.8c2.1-.5 3.6-1.45 4.5-2.2.68.13 1.39.2 2.12.2 4.97 0 9-3.5 9-7.8s-4.03-7.8-9-7.8z" fill="#060810" />
+            <circle cx="8.3" cy="10.6" r="1.15" fill="var(--accent)" />
+            <circle cx="12" cy="10.6" r="1.15" fill="var(--accent)" />
+            <circle cx="15.7" cy="10.6" r="1.15" fill="var(--accent)" />
           </svg>
         )}
       </button>
@@ -128,14 +130,14 @@ export default function Chatbot() {
       <div
         style={{
           position: "fixed",
-          bottom: "88px",
+          bottom: "92px",
           right: "24px",
           zIndex: 299,
-          width: "390px",
-          height: "530px",
+          width: "400px",
+          height: "560px",
           background: "var(--surface)",
           border: "1px solid var(--border-2)",
-          borderRadius: "20px",
+          borderRadius: "22px",
           boxShadow: "0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,212,255,0.06)",
           display: "flex",
           flexDirection: "column",
@@ -150,37 +152,53 @@ export default function Chatbot() {
         {/* Header */}
         <div
           style={{
+            position: "relative",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "14px 16px 13px",
-            background: "var(--surface-2)",
+            padding: "16px 16px 14px",
+            background: "linear-gradient(135deg, var(--surface-2), var(--surface-3))",
             borderBottom: "1px solid var(--border)",
             flexShrink: 0,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "2px",
+              background: "linear-gradient(90deg, transparent, var(--accent), transparent)",
+              opacity: 0.6,
+            }}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: "11px" }}>
             <div
               style={{
-                width: "30px",
-                height: "30px",
-                borderRadius: "8px",
-                background: "var(--accent)",
+                width: "34px",
+                height: "34px",
+                borderRadius: "10px",
+                background: "linear-gradient(145deg, var(--accent), #00a3c4)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontFamily: "var(--font-mono)",
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#060810",
-                letterSpacing: "0.05em",
+                boxShadow: "0 2px 10px rgba(0,212,255,0.3)",
               }}
             >
-              FK
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3c-4.97 0-9 3.5-9 7.8 0 2.45 1.27 4.63 3.28 6.08-.1.97-.46 2.2-1.4 3.4a.5.5 0 00.5.8c2.1-.5 3.6-1.45 4.5-2.2.68.13 1.39.2 2.12.2 4.97 0 9-3.5 9-7.8s-4.03-7.8-9-7.8z" fill="#060810" />
+                <circle cx="8.3" cy="10.6" r="1.05" fill="var(--accent)" />
+                <circle cx="12" cy="10.6" r="1.05" fill="var(--accent)" />
+                <circle cx="15.7" cy="10.6" r="1.05" fill="var(--accent)" />
+              </svg>
             </div>
             <div>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)" }}>Ask Flicker</div>
-              <div style={{ fontSize: "11px", color: "var(--muted)" }}>Text-to-SQL · Live data</div>
+              <div style={{ fontSize: "14.5px", fontWeight: 600, color: "var(--text)" }}>Ask Flicker</div>
+              <div style={{ fontSize: "11px", color: "var(--muted)", display: "flex", alignItems: "center", gap: "5px" }}>
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)", display: "inline-block" }} />
+                Live film data
+              </div>
             </div>
           </div>
           <button
@@ -190,10 +208,19 @@ export default function Chatbot() {
               border: "none",
               cursor: "pointer",
               color: "var(--muted)",
-              padding: "5px",
-              borderRadius: "7px",
+              padding: "6px",
+              borderRadius: "8px",
               display: "flex",
               alignItems: "center",
+              transition: "background 0.15s, color 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "var(--border)";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--text)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "none";
+              (e.currentTarget as HTMLButtonElement).style.color = "var(--muted)";
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -231,52 +258,66 @@ export default function Chatbot() {
             >
               <div
                 style={{
-                  width: "46px",
-                  height: "46px",
-                  borderRadius: "13px",
-                  background: "var(--accent-dim2)",
-                  border: "1px solid rgba(0,212,255,0.2)",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "16px",
+                  background: "linear-gradient(145deg, var(--accent-dim2), var(--accent-dim))",
+                  border: "1px solid rgba(0,212,255,0.22)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  boxShadow: "0 8px 24px rgba(0,212,255,0.12)",
                 }}
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3c-4.97 0-9 3.5-9 7.8 0 2.45 1.27 4.63 3.28 6.08-.1.97-.46 2.2-1.4 3.4a.5.5 0 00.5.8c2.1-.5 3.6-1.45 4.5-2.2.68.13 1.39.2 2.12.2 4.97 0 9-3.5 9-7.8s-4.03-7.8-9-7.8z" fill="var(--accent-dim2)" stroke="var(--accent)" strokeWidth="1.3" />
+                  <circle cx="8.3" cy="10.6" r="1.15" fill="var(--accent)" />
+                  <circle cx="12" cy="10.6" r="1.15" fill="var(--accent)" />
+                  <circle cx="15.7" cy="10.6" r="1.15" fill="var(--accent)" />
                 </svg>
               </div>
-              <p style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+              <p style={{ fontSize: "14.5px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
                 Ask anything about films
               </p>
-              <p style={{ fontSize: "12.5px", color: "var(--muted)", maxWidth: "230px", margin: "2px 0 0", lineHeight: 1.5 }}>
-                Ratings, box-office, audience vs critics — all from live data.
+              <p style={{ fontSize: "12.5px", color: "var(--muted)", maxWidth: "240px", margin: "2px 0 0", lineHeight: 1.5 }}>
+                Ratings, box office, audience vs critics — straight from our film data.
               </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px", width: "100%" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "7px", marginTop: "10px", width: "100%" }}>
                 {SUGGESTIONS.map((s) => (
                   <button
                     key={s}
                     onClick={() => send(s)}
                     style={{
-                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "9px 13px",
                       background: "var(--surface-2)",
                       border: "1px solid var(--border)",
-                      borderRadius: "9px",
+                      borderRadius: "10px",
                       fontSize: "12.5px",
                       color: "var(--muted)",
                       cursor: "pointer",
                       textAlign: "left",
                       fontFamily: "var(--font-ui)",
-                      transition: "border-color 0.15s, color 0.15s",
+                      transition: "border-color 0.15s, color 0.15s, transform 0.15s, background 0.15s",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(0,212,255,0.3)";
-                      (e.currentTarget as HTMLButtonElement).style.color = "var(--accent)";
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.borderColor = "rgba(0,212,255,0.32)";
+                      el.style.color = "var(--accent)";
+                      el.style.background = "var(--surface-3)";
+                      el.style.transform = "translateX(2px)";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border)";
-                      (e.currentTarget as HTMLButtonElement).style.color = "var(--muted)";
+                      const el = e.currentTarget as HTMLButtonElement;
+                      el.style.borderColor = "var(--border)";
+                      el.style.color = "var(--muted)";
+                      el.style.background = "var(--surface-2)";
+                      el.style.transform = "";
                     }}
                   >
+                    <span style={{ color: "var(--accent)", opacity: 0.7, flexShrink: 0 }}>›</span>
                     {s}
                   </button>
                 ))}
@@ -371,7 +412,18 @@ export default function Chatbot() {
         >
           <form
             onSubmit={(e) => { e.preventDefault(); send(input); }}
-            style={{ display: "flex", gap: "8px", alignItems: "center" }}
+            style={{
+              display: "flex",
+              gap: "6px",
+              alignItems: "center",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border-2)",
+              borderRadius: "24px",
+              padding: "5px 5px 5px 16px",
+              transition: "border-color 0.15s",
+            }}
+            onFocus={(e) => { (e.currentTarget as HTMLFormElement).style.borderColor = "rgba(0,212,255,0.4)"; }}
+            onBlur={(e) => { (e.currentTarget as HTMLFormElement).style.borderColor = "var(--border-2)"; }}
           >
             <input
               ref={inputRef}
@@ -382,10 +434,9 @@ export default function Chatbot() {
               disabled={loading}
               style={{
                 flex: 1,
-                background: "var(--surface-2)",
-                border: "1px solid var(--border-2)",
-                borderRadius: "10px",
-                padding: "9px 12px",
+                background: "transparent",
+                border: "none",
+                padding: "9px 0",
                 color: "var(--text)",
                 fontFamily: "var(--font-ui)",
                 fontSize: "13.5px",
@@ -397,22 +448,22 @@ export default function Chatbot() {
               type="submit"
               disabled={loading || !input.trim()}
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
                 border: "none",
                 cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-                background: "var(--accent)",
+                background: "linear-gradient(145deg, var(--accent), #00a3c4)",
                 color: "#060810",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                opacity: loading || !input.trim() ? 0.45 : 1,
+                opacity: loading || !input.trim() ? 0.4 : 1,
                 transition: "transform 0.15s, opacity 0.15s",
                 flexShrink: 0,
               }}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
@@ -432,7 +483,7 @@ export default function Chatbot() {
           color: var(--muted);
           border-top: 1px solid rgba(255,255,255,0.05);
         }
-        .chat-sql-error {
+        .chat-error-note {
           padding: 8px 10px;
           font-size: 12px;
           color: var(--danger);

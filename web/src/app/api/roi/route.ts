@@ -3,6 +3,7 @@ import { roiByDecade, topRoiFilms } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
+export const maxDuration = 60;
 
 export async function GET() {
   try {

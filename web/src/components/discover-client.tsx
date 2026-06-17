@@ -63,14 +63,23 @@ export default function DiscoverClient() {
   const [activeMood, setActiveMood] = useState<Mood | null>(null);
   const [films, setFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
-  const fetchMood = useCallback(async (mood: Mood) => {
+  const fetchMood = useCallback(async (mood: Mood, attempt = 0) => {
     setLoading(true);
+    setError(false);
     setFilms([]);
     try {
       const r = await fetch(`/api/discover?mood=${mood}`);
+      if (!r.ok) throw new Error(`status ${r.status}`);
       const d = await r.json();
       setFilms(d.films ?? []);
+    } catch {
+      if (attempt < 1) {
+        await fetchMood(mood, attempt + 1);
+        return;
+      }
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -206,7 +215,13 @@ export default function DiscoverClient() {
         </div>
       )}
 
-      {!loading && activeMood && films.length === 0 && (
+      {!loading && error && (
+        <div className="empty-state">
+          Couldn&rsquo;t load films right now — try again in a moment.
+        </div>
+      )}
+
+      {!loading && !error && activeMood && films.length === 0 && (
         <div className="empty-state">
           No films found for this vibe in the current dataset.
         </div>

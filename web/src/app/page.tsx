@@ -27,18 +27,28 @@ export default function PulsePage() {
   const [fotd, setFotd] = useState<Film | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/metrics").then((r) => r.json()),
-      fetch("/api/roi").then((r) => r.json()),
-      fetch("/api/genres").then((r) => r.json()),
-      fetch("/api/film-of-day").then((r) => r.json()),
+    async function loadJson(url: string) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`${url}: ${r.status}`);
+      return r.json();
+    }
+
+    Promise.allSettled([
+      loadJson("/api/metrics"),
+      loadJson("/api/roi"),
+      loadJson("/api/genres"),
+      loadJson("/api/film-of-day"),
     ]).then(([m, r, g, f]) => {
-      setMetrics(m.metrics);
-      setRoi(m.roi);
-      setDecade(r.decade);
-      setTop(r.top);
-      setGenres(g.genres);
-      setFotd(f.film);
+      if (m.status === "fulfilled") {
+        setMetrics(m.value.metrics);
+        setRoi(m.value.roi);
+      }
+      if (r.status === "fulfilled") {
+        setDecade(r.value.decade);
+        setTop(r.value.top);
+      }
+      if (g.status === "fulfilled") setGenres(g.value.genres);
+      if (f.status === "fulfilled") setFotd(f.value.film);
     });
   }, []);
 

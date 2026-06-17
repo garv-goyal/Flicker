@@ -3,6 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import { query } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const SCHEMA = `
 Available DuckDB tables (Gold layer, always prefix schema):
@@ -52,7 +53,9 @@ Rules:
    - Only SELECT queries — never DDL or DML.
 3. Tables prefixed with mart_ are pre-aggregated — never add GROUP BY to them.
 4. If the question needs no data, skip the SQL block.
-5. Be concise and conversational.`;
+5. Be concise and conversational.
+6. Never mention SQL, queries, tables, schemas, or "the database" in your reply to
+   the user — talk about films and data, not how it's stored or fetched.`;
 
 function extractSql(text: string): string | null {
   const m = text.match(/```sql\s*([\s\S]*?)\s*```/i);
@@ -88,7 +91,7 @@ export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "GEMINI_API_KEY not configured." }, { status: 500 });
+      return NextResponse.json({ error: "Assistant is not available right now." }, { status: 500 });
     }
 
     const { messages, question } = (await req.json()) as { messages: ChatMessage[]; question: string };
@@ -134,7 +137,8 @@ export async function POST(req: NextRequest) {
           tableHtml = `<div class="chat-row-count">0 rows</div>`;
         }
       } catch (e) {
-        tableHtml = `<div class="chat-sql-error">Query error: ${String(e)}</div>`;
+        console.error("[chat] query failed", e);
+        tableHtml = `<div class="chat-error-note">Couldn&rsquo;t load that data right now.</div>`;
       }
     }
 

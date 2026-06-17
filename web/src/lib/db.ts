@@ -20,9 +20,7 @@ function deepConvert(value: unknown): unknown {
   return value;
 }
 
-async function getConn() {
-  if (_conn) return _conn;
-
+async function connect(): Promise<DuckDBConn> {
   const useMd = process.env.FLICKER_USE_MOTHERDUCK === "true";
   let dbPath: string;
 
@@ -40,19 +38,48 @@ async function getConn() {
   }
 
   _instance = await DuckDBInstance.create(dbPath, {});
-  _conn = await _instance.connect();
-  return _conn;
+  return _instance.connect();
+}
+
+// MotherDuck cold connections occasionally fail/timeout on serverless cold
+// starts — retry a few times with backoff before giving up.
+async function getConn(forceNew = false): Promise<DuckDBConn> {
+  if (_conn && !forceNew) return _conn;
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      _conn = await connect();
+      return _conn;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
+}
+
+// If a query fails on a cached connection (e.g. a dropped/stale connection),
+// reconnect once and retry before surfacing the error.
+async function withConn<T>(fn: (conn: DuckDBConn) => Promise<T>): Promise<T> {
+  try {
+    return await fn(await getConn());
+  } catch {
+    _conn = null;
+    return fn(await getConn(true));
+  }
 }
 
 export async function query<T = Record<string, unknown>>(
   sql: string
 ): Promise<T[]> {
-  const conn = await getConn();
-  const stmt = await conn.prepare(sql);
-  const result = await stmt.runAndReadAll();
-  await result.readAll();
-  const rows = result.getRowObjectsJS() as unknown[];
-  return deepConvert(rows) as T[];
+  return withConn(async (conn) => {
+    const stmt = await conn.prepare(sql);
+    const result = await stmt.runAndReadAll();
+    await result.readAll();
+    const rows = result.getRowObjectsJS() as unknown[];
+    return deepConvert(rows) as T[];
+  });
 }
 
 export async function queryOne<T = Record<string, unknown>>(
@@ -63,7 +90,8 @@ export async function queryOne<T = Record<string, unknown>>(
 }
 
 export async function execute(sql: string): Promise<void> {
-  const conn = await getConn();
-  const stmt = await conn.prepare(sql);
-  await stmt.run();
+  await withConn(async (conn) => {
+    const stmt = await conn.prepare(sql);
+    await stmt.run();
+  });
 }
