@@ -1,6 +1,11 @@
 import path from "path";
 import { DuckDBInstance } from "@duckdb/node-api";
 
+// Vercel's Lambda runtime doesn't set HOME, but DuckDB needs one to resolve
+// its config/extension directory — anything reading process.env.HOME
+// directly (e.g. the MotherDuck extension) needs this set too.
+if (!process.env.HOME) process.env.HOME = "/tmp";
+
 type DuckDBConn = Awaited<ReturnType<Awaited<ReturnType<typeof DuckDBInstance.create>>["connect"]>>;
 
 let _connPromise: Promise<DuckDBConn> | null = null;
@@ -40,7 +45,11 @@ async function connect(): Promise<DuckDBConn> {
     dbPath = process.env.FLICKER_DB_PATH ?? defaultPath;
   }
 
-  const instance = await DuckDBInstance.create(dbPath, {});
+  // Vercel's Lambda runtime doesn't set HOME, and DuckDB needs a writable
+  // home directory for extension/config state — /tmp always exists there.
+  const instance = await DuckDBInstance.create(dbPath, {
+    home_directory: process.env.HOME || "/tmp",
+  });
   return instance.connect();
 }
 
