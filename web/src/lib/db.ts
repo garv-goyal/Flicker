@@ -3,8 +3,11 @@ import { DuckDBInstance } from "@duckdb/node-api";
 
 type DuckDBConn = Awaited<ReturnType<Awaited<ReturnType<typeof DuckDBInstance.create>>["connect"]>>;
 
-let _instance: Awaited<ReturnType<typeof DuckDBInstance.create>> | null = null;
-let _conn: DuckDBConn | null = null;
+let _connPromise: Promise<DuckDBConn> | null = null;
+// Serializes all query execution onto the single shared connection — the
+// native DuckDB binding isn't safe under concurrent calls on one connection,
+// and concurrent first-connects on cold start crashed the Vercel function.
+let _queue: Promise<unknown> = Promise.resolve();
 
 function deepConvert(value: unknown): unknown {
   if (typeof value === "bigint") return Number(value);
@@ -37,20 +40,15 @@ async function connect(): Promise<DuckDBConn> {
     dbPath = process.env.FLICKER_DB_PATH ?? defaultPath;
   }
 
-  _instance = await DuckDBInstance.create(dbPath, {});
-  return _instance.connect();
+  const instance = await DuckDBInstance.create(dbPath, {});
+  return instance.connect();
 }
 
-// MotherDuck cold connections occasionally fail/timeout on serverless cold
-// starts — retry a few times with backoff before giving up.
-async function getConn(forceNew = false): Promise<DuckDBConn> {
-  if (_conn && !forceNew) return _conn;
-
+async function connectWithRetry(): Promise<DuckDBConn> {
   let lastErr: unknown;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      _conn = await connect();
-      return _conn;
+      return await connect();
     } catch (e) {
       lastErr = e;
       if (attempt < 2) await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
@@ -59,15 +57,30 @@ async function getConn(forceNew = false): Promise<DuckDBConn> {
   throw lastErr;
 }
 
-// If a query fails on a cached connection (e.g. a dropped/stale connection),
-// reconnect once and retry before surfacing the error.
-async function withConn<T>(fn: (conn: DuckDBConn) => Promise<T>): Promise<T> {
-  try {
-    return await fn(await getConn());
-  } catch {
-    _conn = null;
-    return fn(await getConn(true));
+// Caches the in-flight connection *promise* (not just the resolved value) so
+// concurrent callers on a cold start all await one connect attempt instead
+// of each racing to open a separate connection.
+function getConn(forceNew = false): Promise<DuckDBConn> {
+  if (forceNew) _connPromise = null;
+  if (!_connPromise) {
+    _connPromise = connectWithRetry();
+    _connPromise.catch(() => {
+      _connPromise = null;
+    });
   }
+  return _connPromise;
+}
+
+async function withConn<T>(fn: (conn: DuckDBConn) => Promise<T>): Promise<T> {
+  const run = _queue.then(async () => {
+    try {
+      return await fn(await getConn());
+    } catch {
+      return fn(await getConn(true));
+    }
+  });
+  _queue = run.catch(() => {});
+  return run as Promise<T>;
 }
 
 export async function query<T = Record<string, unknown>>(
