@@ -10,7 +10,7 @@ const GENRES = [
 export default function NewsletterPage() {
   const [email, setEmail] = useState("");
   const [genre, setGenre] = useState("No preference");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "updated" | "exists" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "new" | "updated" | "exists" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const [unsubEmail, setUnsubEmail] = useState("");
@@ -124,7 +124,7 @@ export default function NewsletterPage() {
           </div>
 
           <div className="card">
-            {status === "success" || status === "new" ? (
+            {status === "new" ? (
               <div style={{ padding: "8px 0" }}>
                 <div style={{ color: "var(--success)", fontWeight: 600, marginBottom: "6px" }}>
                   You&rsquo;re in.
