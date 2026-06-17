@@ -1,5 +1,4 @@
 import path from "path";
-// @ts-expect-error — no bundled types, package provides runtime
 import { DuckDBInstance } from "@duckdb/node-api";
 
 let _instance: Awaited<ReturnType<typeof DuckDBInstance.create>> | null = null;
