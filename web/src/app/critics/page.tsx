@@ -1,23 +1,31 @@
-import {
-  criticalSummary,
-  bestReviewed,
-  audienceOverCritics,
-  criticsOverAudience,
-} from "@/lib/queries";
+"use client";
 
-export const revalidate = 3600;
+import { useEffect, useState } from "react";
+
+type Summary = { scored: number; avg_composite: number; oscar_winners: number; with_rt: number };
+type BestFilm = { title: string; release_year: number; primary_genre: string; composite_score: number; rt_score: number | null; metacritic_score: number | null; imdb_rating: number | null; won_oscar: boolean; oscar_wins: number | null };
+type GapFilm = { title: string; release_year: number; rt_score: number; audience_score: number; gap: number };
 
 function cell(v: number | null, suffix = "") {
   return v == null ? "—" : `${v}${suffix}`;
 }
 
-export default async function CriticsPage() {
-  const [summary, best, audienceFav, criticsFav] = await Promise.all([
-    criticalSummary(),
-    bestReviewed(12),
-    audienceOverCritics(7),
-    criticsOverAudience(7),
-  ]);
+export default function CriticsPage() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [best, setBest] = useState<BestFilm[]>([]);
+  const [audienceFav, setAudienceFav] = useState<GapFilm[]>([]);
+  const [criticsFav, setCriticsFav] = useState<GapFilm[]>([]);
+
+  useEffect(() => {
+    fetch("/api/critics")
+      .then((r) => r.json())
+      .then((d) => {
+        setSummary(d.summary);
+        setBest(d.best);
+        setAudienceFav(d.audienceFav);
+        setCriticsFav(d.criticsFav);
+      });
+  }, []);
 
   const oscarPct =
     summary && summary.scored > 0

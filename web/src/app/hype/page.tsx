@@ -1,19 +1,30 @@
-import { hypeScatter, hypeCounts, hypeExamples } from "@/lib/queries";
+"use client";
+
+import { useEffect, useState } from "react";
 import HypeScatterClient from "@/components/charts/hype-scatter-client";
 
-export const revalidate = 3600;
+type ScatterPoint = { title: string; release_year: number; primary_genre: string; trailer_views: number; roi_ratio: number; composite_score: number; outcome_label: string };
+type CountRow = { outcome_label: string; films: number; avg_roi: number; avg_views: number };
+type HypeFilm = { title: string; release_year: number; trailer_views: number; roi_ratio: number };
 
-export default async function HypePage() {
-  const [scatter, counts, overhyped, gems] = await Promise.all([
-    hypeScatter(),
-    hypeCounts(),
-    hypeExamples("Overhyped", 6),
-    hypeExamples("Hidden gem", 6),
-  ]);
+export default function HypePage() {
+  const [scatter, setScatter] = useState<ScatterPoint[]>([]);
+  const [counts, setCounts] = useState<CountRow[]>([]);
+  const [overhyped, setOverhyped] = useState<HypeFilm[]>([]);
+  const [gems, setGems] = useState<HypeFilm[]>([]);
 
-  const countMap = Object.fromEntries(
-    counts.map((c) => [c.outcome_label, c.films])
-  );
+  useEffect(() => {
+    fetch("/api/hype")
+      .then((r) => r.json())
+      .then((d) => {
+        setScatter(d.scatter);
+        setCounts(d.counts);
+        setOverhyped(d.overhyped);
+        setGems(d.gems);
+      });
+  }, []);
+
+  const countMap = Object.fromEntries(counts.map((c) => [c.outcome_label, c.films]));
 
   return (
     <div className="page-wrap">

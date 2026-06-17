@@ -1,15 +1,15 @@
-import {
-  headlineMetrics,
-  roiSummary,
-  roiByDecade,
-  topRoiFilms,
-  genreLeaderboard,
-  filmOfTheDay,
-} from "@/lib/queries";
+"use client";
+
+import { useEffect, useState } from "react";
 import RoiDecadeChart from "@/components/charts/roi-decade-chart";
 import FilmOfDay from "@/components/film-of-day";
 
-export const revalidate = 3600;
+type Metrics = { total_films: number; first_year: number; last_year: number; genres: number };
+type RoiSummary = { avg_roi: number; median_roi: number; profitable_pct: number };
+type DecadeRow = { release_decade: number; film_count: number; avg_roi: number; median_roi: number; profitable_pct: number };
+type TopFilm = { title: string; release_year: number; primary_genre: string; budget_usd: number; revenue_usd: number; roi_ratio: number; tmdb_rating: number };
+type GenreRow = { primary_genre: string; films: number; avg_roi: number; avg_rating: number };
+type Film = { title: string; release_year: number; primary_genre: string; composite_score: number; tmdb_rating: number; rt_score: number; metacritic_score: number; roi_ratio: number | null; won_oscar: boolean; oscar_wins: number | null };
 
 function money(v: number | null) {
   if (!v) return "—";
@@ -18,15 +18,29 @@ function money(v: number | null) {
   return `$${v.toLocaleString()}`;
 }
 
-export default async function PulsePage() {
-  const [metrics, roi, decade, top, genres, fotd] = await Promise.all([
-    headlineMetrics(),
-    roiSummary(),
-    roiByDecade(),
-    topRoiFilms(10),
-    genreLeaderboard(8),
-    filmOfTheDay(),
-  ]);
+export default function PulsePage() {
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [roi, setRoi] = useState<RoiSummary | null>(null);
+  const [decade, setDecade] = useState<DecadeRow[]>([]);
+  const [top, setTop] = useState<TopFilm[]>([]);
+  const [genres, setGenres] = useState<GenreRow[]>([]);
+  const [fotd, setFotd] = useState<Film | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/metrics").then((r) => r.json()),
+      fetch("/api/roi").then((r) => r.json()),
+      fetch("/api/genres").then((r) => r.json()),
+      fetch("/api/film-of-day").then((r) => r.json()),
+    ]).then(([m, r, g, f]) => {
+      setMetrics(m.metrics);
+      setRoi(m.roi);
+      setDecade(r.decade);
+      setTop(r.top);
+      setGenres(g.genres);
+      setFotd(f.film);
+    });
+  }, []);
 
   const best = genres[0] ?? null;
 
@@ -76,14 +90,14 @@ export default async function PulsePage() {
       </div>
 
       {/* ── Today's pick ──────────────────────────────────────────── */}
-      {fotd.length > 0 && (
+      {fotd && (
         <>
           <div className="divider" />
           <div className="section-head">
             <h2>Today&rsquo;s pick</h2>
             <p>One top-rated film, rotated daily from the best in the dataset.</p>
           </div>
-          <FilmOfDay films={fotd} />
+          <FilmOfDay films={[fotd]} />
         </>
       )}
 
