@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { discoverByMood, type Mood } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const VALID_MOODS: Mood[] = [

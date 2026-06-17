@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { query } from "@/lib/db";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const SCHEMA = `

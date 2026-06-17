@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execute, query } from "@/lib/db";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const DDL = `
