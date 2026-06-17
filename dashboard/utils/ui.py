@@ -6,12 +6,12 @@ _ASSETS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 # (label, url-path, key) — must match the url_path of each st.Page in app.py.
 NAV = [
-    ("Overview", "/", "overview"),
-    ("Critical", "/critical", "critical"),
-    ("Hype vs Reality", "/hype", "hype"),
-    ("Genres", "/genres", "genres"),
-    ("Operations", "/operations", "operations"),
-    ("Newsletter", "/subscribe", "subscribe"),
+    ("Pulse",    "/",           "overview"),
+    ("Critics",  "/critical",   "critical"),
+    ("Hype",     "/hype",       "hype"),
+    ("Genres",   "/genres",     "genres"),
+    ("Pipeline", "/operations", "operations"),
+    ("Weekly",   "/subscribe",  "subscribe"),
 ]
 
 
@@ -24,7 +24,7 @@ def inject_css():
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-def header(active: str, subtitle: str = "Film Intelligence"):
+def header(active: str, subtitle: str = "analytics"):
     links = "".join(
         f'<a class="{ "active" if key == active else "" }" href="{url}" '
         f'target="_self">{label}</a>'
@@ -55,9 +55,9 @@ def eyebrow(text: str):
 def footer():
     st.markdown("""
     <div class="fk-foot">
-      <span>Flicker · Entertainment analytics</span>
-      <span>Built with <span class="gold">DuckDB · dbt · Kafka · Streamlit</span> ·
-        Data from TMDB, OMDb &amp; YouTube</span>
+      <span>Flicker · Film Intelligence</span>
+      <span>DuckDB · dbt · Kafka · Streamlit · Data from
+        <span class="gold">TMDB · OMDb · YouTube</span></span>
     </div>
     """, unsafe_allow_html=True)
 

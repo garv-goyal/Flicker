@@ -39,7 +39,7 @@ st.markdown(f"""
      change off the write-ahead log and streams it through Kafka into the warehouse,
      so this view is reconstructed entirely from the change stream — no batch polling.</p>
 </div>
-<div class="fk-kpis">
+<div class="fk-kpis kpis-2">
   <div class="fk-kpi"><div class="v">{int(s.live_films)}</div><div class="l">Films in release</div></div>
   <div class="fk-kpi"><div class="v">{int(s.now_playing)}</div><div class="l">Now playing</div></div>
 </div>

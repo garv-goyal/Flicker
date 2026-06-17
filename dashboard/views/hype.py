@@ -31,10 +31,10 @@ def n(label):
 
 st.markdown(f"""
 <div class="fk-hero">
-  {ui.eyebrow("Hype vs reality")}
-  <h1>Did the <em>hype</em> match reality?</h1>
-  <p>Each film's trailer views (the buzz) plotted against its actual return on investment
-     (the reality). Films are labelled by comparing both against the median of this set.</p>
+  {ui.eyebrow("Hype · Reality · Returns")}
+  <h1>Did the <em>hype</em> deliver?</h1>
+  <p>Trailer views against actual box-office ROI. High buzz that paid off, high buzz
+     that didn't, and the quiet films that surprised everyone — all visible at once.</p>
 </div>
 <div class="fk-kpis">
   <div class="fk-kpi"><div class="v">{n('Delivered')}</div><div class="l">Delivered</div></div>

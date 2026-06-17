@@ -1,15 +1,13 @@
-"""Read-only query helpers for the dashboard. Each opens a fresh read-only DuckDB
-connection, returns a DataFrame, and closes — so Streamlit can cache the results
-and multiple page loads never contend for a write lock."""
-from .duckdb_conn import get_connection
+"""Read-only query helpers for the dashboard.
+
+Uses a single shared connection per Streamlit process (via st.cache_resource) so
+MotherDuck authenticates once on startup rather than on every query call.
+"""
+from .duckdb_conn import get_shared_read_conn
 
 
 def _df(sql: str):
-    conn = get_connection(read_only=True)
-    try:
-        return conn.execute(sql).df()
-    finally:
-        conn.close()
+    return get_shared_read_conn().execute(sql).df()
 
 
 def headline_metrics():
@@ -295,6 +293,22 @@ def lifecycle_changes(limit: int = 14):
         from gold.mart_lifecycle_changes
         order by source_ts desc, change_id desc
         limit {limit}
+    """)
+
+
+def film_of_the_day():
+    """Top-60 films by composite + audience score; caller picks by day-of-year to rotate daily."""
+    return _df("""
+        select d.title, d.release_year, d.primary_genre,
+               f.composite_score, f.tmdb_rating, f.rt_score, f.metacritic_score,
+               f.roi_ratio, f.won_oscar, f.oscar_wins
+        from gold.fact_title_performance f
+        join gold.dim_titles d using (title_key)
+        where f.composite_score >= 80
+          and f.tmdb_rating is not null
+          and f.rt_score is not null
+        order by (f.composite_score + f.tmdb_rating * 5) desc
+        limit 60
     """)
 
 

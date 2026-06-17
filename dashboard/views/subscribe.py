@@ -78,32 +78,42 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ── what's inside ─────────────────────────────────────────────────────────────
+# ── what's in each issue ───────────────────────────────────────────────────────
 st.markdown("""
-<div class="fk-kpis" style="margin-bottom:32px;">
-  <div class="fk-kpi">
-    <div class="v" style="font-size:20px;">🎬</div>
-    <div class="l">This week's pick</div>
-    <div class="muted" style="font-size:12px;margin-top:4px;">Scored on rating + buzz + popularity</div>
+<div class="fk-features">
+  <div class="fk-feature">
+    <div class="fk-feature-num">01</div>
+    <div>
+      <div class="fk-feature-label">This week's pick</div>
+      <div class="fk-feature-desc">One film, scored across TMDB rating, audience buzz
+        and popularity trend. Genre-filtered if you have a preference set.</div>
+    </div>
   </div>
-  <div class="fk-kpi">
-    <div class="v" style="font-size:20px;">⏳</div>
-    <div class="l">Leaving soon</div>
-    <div class="muted" style="font-size:12px;margin-top:4px;">Best-rated film in its final days</div>
+  <div class="fk-feature">
+    <div class="fk-feature-num">02</div>
+    <div>
+      <div class="fk-feature-label">Leaving soon</div>
+      <div class="fk-feature-desc">The best-rated film in its final days in theaters.
+        Catch it before it's gone.</div>
+    </div>
   </div>
-  <div class="fk-kpi">
-    <div class="v" style="font-size:20px;">📊</div>
-    <div class="l">Critics vs Crowds</div>
-    <div class="muted" style="font-size:12px;margin-top:4px;">Where the biggest disagreements are</div>
+  <div class="fk-feature">
+    <div class="fk-feature-num">03</div>
+    <div>
+      <div class="fk-feature-label">Critics vs audiences</div>
+      <div class="fk-feature-desc">Where opinion diverges most — the films audiences
+        love that critics underrated, and the ones critics championed that left
+        audiences cold.</div>
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── form ──────────────────────────────────────────────────────────────────────
-left, _, right = st.columns([5, 1, 4])
+# ── form + panel ──────────────────────────────────────────────────────────────
+left, right = st.columns([3, 2], gap="large")
 
 with left:
-    st.markdown('<div class="fk-section"><h2>Subscribe</h2>'
+    st.markdown('<div class="fk-section" style="margin-top:0;"><h2>Subscribe</h2>'
                 '<p>Free, weekly, unsubscribe any time.</p></div>',
                 unsafe_allow_html=True)
 
@@ -111,7 +121,7 @@ with left:
         email_input = st.text_input(
             "Email address",
             placeholder="you@example.com",
-            help="Your email stays in the local Flicker database and is never shared."
+            help="Your email stays in the Flicker database and is never shared."
         )
         genre_input = st.selectbox(
             "Genre preference (optional)",
@@ -119,7 +129,7 @@ with left:
             help="Your weekly pick will be filtered to this genre first. "
                  "Falls back to all genres if nothing qualifies."
         )
-        submitted = st.form_submit_button("Subscribe →", width="stretch")
+        submitted = st.form_submit_button("Subscribe", use_container_width=True)
 
     if submitted:
         email_clean = email_input.strip().lower()
@@ -133,79 +143,56 @@ with left:
             result = _subscribe(email_clean, genre_clean)
             if result == "new":
                 st.markdown(f"""
-                <div class="fk-card" style="padding:16px 20px;border:1px solid rgba(52,211,153,0.25);
-                                             background:rgba(52,211,153,0.05);margin-top:12px;">
+                <div class="fk-card" style="padding:16px 20px;border-color:rgba(52,211,153,0.25);
+                                             background:rgba(52,211,153,0.04);margin-top:12px;">
                   <span style="color:#34D399;font-weight:600;">You're in.</span>
-                  <span class="muted"> First email lands this Sunday.</span>
-                  {f'<br><span class="muted" style="font-size:13px;">Picks will be filtered for <strong style="color:var(--gold);">{genre_clean}</strong>.</span>' if genre_clean else ""}
+                  <span class="muted" style="color:var(--muted);"> First email lands this Sunday.</span>
+                  {f'<br><span style="color:var(--faint);font-size:13px;margin-top:4px;display:block;">Picks filtered for <strong style="color:var(--gold);">{genre_clean}</strong>.</span>' if genre_clean else ""}
                 </div>""", unsafe_allow_html=True)
             elif result == "updated":
                 st.markdown("""
-                <div class="fk-card" style="padding:16px 20px;border:1px solid rgba(232,184,75,0.25);
-                                             background:rgba(232,184,75,0.05);margin-top:12px;">
+                <div class="fk-card" style="padding:16px 20px;border-color:rgba(232,184,75,0.25);
+                                             background:rgba(232,184,75,0.04);margin-top:12px;">
                   <span style="color:#E8B84B;font-weight:600;">Preferences updated.</span>
-                  <span class="muted"> Changes take effect from the next send.</span>
+                  <span style="color:var(--muted);"> Changes take effect from the next send.</span>
                 </div>""", unsafe_allow_html=True)
             else:
                 st.markdown("""
                 <div class="fk-card" style="padding:16px 20px;margin-top:12px;">
-                  <span class="muted">You're already subscribed with those preferences.</span>
+                  <span style="color:var(--muted);">You're already subscribed with those preferences.</span>
                 </div>""", unsafe_allow_html=True)
 
-    # Unsubscribe section
-    st.markdown('<div style="margin-top:28px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-top:24px;"></div>', unsafe_allow_html=True)
     with st.expander("Unsubscribe"):
         with st.form("unsubscribe_form", clear_on_submit=True):
             unsub_email = st.text_input("Email address to remove", placeholder="you@example.com")
-            unsub_btn = st.form_submit_button("Unsubscribe", width="stretch")
+            unsub_btn = st.form_submit_button("Unsubscribe", use_container_width=True)
         if unsub_btn:
             unsub_clean = unsub_email.strip().lower()
             if _is_valid_email(unsub_clean):
                 _unsubscribe(unsub_clean)
-                st.success(f"{unsub_clean} removed from the list.")
+                st.success(f"{unsub_clean} removed.")
             else:
                 st.error("Enter a valid email address.")
 
 with right:
     st.markdown("""
-    <div class="fk-section"><h2>What you'll get</h2></div>
-    <div class="fk-card" style="padding:20px 24px;">
-
-      <div style="margin-bottom:16px;">
-        <div style="color:var(--gold);font-size:12px;letter-spacing:1.5px;
-                    text-transform:uppercase;font-weight:600;margin-bottom:4px;">
-          Main Pick
-        </div>
-        <div style="color:var(--text);font-size:14px;line-height:1.6;">
-          One film, scored on TMDB rating + audience buzz + popularity. If you set
-          a genre, your pick comes from that genre first.
-        </div>
+    <div class="fk-section" style="margin-top:0;"><h2>What you'll get</h2></div>
+    <div class="fk-card" style="padding:22px 24px;">
+      <div class="fk-content-item">
+        <div class="fk-content-label">Main pick</div>
+        <div class="fk-content-desc">One film scored on TMDB rating, audience buzz and
+          popularity. Genre-filtered first if you set a preference, then all genres.</div>
       </div>
-
-      <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:16px;"></div>
-
-      <div style="margin-bottom:16px;">
-        <div style="color:var(--red);font-size:12px;letter-spacing:1.5px;
-                    text-transform:uppercase;font-weight:600;margin-bottom:4px;">
-          Leaving Soon
-        </div>
-        <div style="color:var(--text);font-size:14px;line-height:1.6;">
-          The best-rated film in its final days. Catch it before it's gone.
-        </div>
+      <div class="fk-content-item">
+        <div class="fk-content-label">Leaving soon</div>
+        <div class="fk-content-desc">The best-rated film entering its final week in
+          theaters. Catch it before it leaves.</div>
       </div>
-
-      <div style="height:1px;background:rgba(255,255,255,0.06);margin-bottom:16px;"></div>
-
-      <div>
-        <div style="color:#9A9AAA;font-size:12px;letter-spacing:1.5px;
-                    text-transform:uppercase;font-weight:600;margin-bottom:4px;">
-          Critics vs Crowds
-        </div>
-        <div style="color:var(--text);font-size:14px;line-height:1.6;">
-          Where audience sentiment diverges most from critic scores — the underrated
-          gems and the overhyped ones.
-        </div>
+      <div class="fk-content-item">
+        <div class="fk-content-label">Critics vs crowds</div>
+        <div class="fk-content-desc">Where audience sentiment diverges most from
+          critic scores — the underrated gems and the overhyped ones.</div>
       </div>
-
     </div>
     """, unsafe_allow_html=True)

@@ -535,7 +535,11 @@ export default function({ data, setStateValue, setTriggerValue, parentElement })
   if (msgs.length === 0) {
     msgsEl.innerHTML = `
       <div id="fk-chat-empty">
-        <div class="fk-empty-icon">✦</div>
+        <div class="fk-empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="#E8B84B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <p class="fk-empty-title">Ask anything about films</p>
         <p class="fk-empty-sub">What's playing, ratings, box-office, audience vs critics — all from live data.</p>
         <div class="fk-suggestions">

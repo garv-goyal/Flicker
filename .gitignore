@@ -35,6 +35,9 @@ spark-warehouse/
 *.parquet
 data/
 
+# Node
+node_modules/
+
 # OS / editor
 .DS_Store
 .idea/
@@ -42,6 +45,7 @@ data/
 
 # Claude Code
 CLAUDE.md
+AGENTS.md
 .claude/
 
 # Streamlit secrets (keep config.toml, ignore secrets.toml)

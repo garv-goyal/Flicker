@@ -20,10 +20,10 @@ s = d["summary"]
 
 st.markdown(f"""
 <div class="fk-hero">
-  {ui.eyebrow("Critical reception")}
-  <h1>The most <em>acclaimed</em> films</h1>
-  <p>A composite score blends Rotten Tomatoes, Metacritic, IMDb and TMDB ratings
-     onto a single 0–100 scale, so critic and audience opinion can be compared directly.</p>
+  {ui.eyebrow("Critics · Audience · Awards")}
+  <h1>The scores behind the <em>acclaim</em></h1>
+  <p>Rotten Tomatoes, Metacritic, IMDb, and TMDB — blended into a single composite
+     score so you can compare films directly, regardless of which platform rated them.</p>
 </div>
 <div class="fk-kpis">
   <div class="fk-kpi"><div class="v">{int(s.scored):,}</div><div class="l">Films scored</div></div>
@@ -69,6 +69,17 @@ st.markdown(f"""
     <th class="num">Composite</th><th class="num">RT</th><th class="num">Metacritic</th>
     <th class="num">IMDb</th><th>Awards</th></tr></thead>
   <tbody>{rows}</tbody></table></div>""", unsafe_allow_html=True)
+
+oscar_pct = (s.oscar_winners / s.scored * 100) if s.scored > 0 else 0
+st.markdown(f"""
+<div class="fk-insight">
+  <div class="fk-insight-label">Data note</div>
+  <p class="fk-insight-text">Oscar-winning films account for {oscar_pct:.1f}% of scored titles
+    yet cluster almost entirely in the top quartile of composite rankings.</p>
+  <p class="fk-insight-sub">Critical consensus and Academy taste point to the same films
+    more reliably than audiences typically assume. {int(s.oscar_winners)} winners in dataset.</p>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown('<div class="fk-section"><h2>Where critics and audiences disagree</h2>'
             '<p>Widest gaps between the critics\' score (Rotten Tomatoes) and the audience '

@@ -13,12 +13,12 @@ st.set_page_config(page_title="Flicker — Film Intelligence", page_icon=ui.favi
                    layout="wide", initial_sidebar_state="collapsed")
 
 pages = [
-    st.Page("views/overview.py", title="Overview", default=True),
-    st.Page("views/critical.py", title="Critical", url_path="critical"),
-    st.Page("views/hype.py", title="Hype vs Reality", url_path="hype"),
+    st.Page("views/overview.py", title="Pulse", default=True),
+    st.Page("views/critical.py", title="Critics", url_path="critical"),
+    st.Page("views/hype.py", title="Hype", url_path="hype"),
     st.Page("views/genres.py", title="Genres", url_path="genres"),
-    st.Page("views/operations.py", title="Operations", url_path="operations"),
-    st.Page("views/subscribe.py", title="Newsletter", url_path="subscribe"),
+    st.Page("views/operations.py", title="Pipeline", url_path="operations"),
+    st.Page("views/subscribe.py", title="Weekly", url_path="subscribe"),
 ]
 
 current = st.navigation(pages, position="hidden")

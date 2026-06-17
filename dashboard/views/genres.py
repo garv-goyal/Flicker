@@ -22,6 +22,8 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown('<div class="fk-section" style="margin-top:0;margin-bottom:10px;">'
+            '<h2>Filter by genre</h2></div>', unsafe_allow_html=True)
 top_genres = totals.sort_values("films", ascending=False)["primary_genre"].head(6).tolist()
 chosen = st.multiselect("Genres", options=totals["primary_genre"].tolist(),
                         default=top_genres, label_visibility="collapsed")

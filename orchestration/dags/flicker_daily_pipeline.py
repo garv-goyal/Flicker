@@ -33,12 +33,12 @@ with DAG(
 
     ingest_tmdb = BashOperator(
         task_id="ingest_tmdb",
-        bash_command='cd "$FLICKER_HOME" && "$FLICKER_PY" ingestion/tmdb_movies.py 100',
+        bash_command='cd "$FLICKER_HOME" && "$FLICKER_PY" ingestion/tmdb_movies.py 500',
     )
 
     enrich_omdb = BashOperator(
         task_id="enrich_omdb",
-        bash_command='cd "$FLICKER_HOME" && "$FLICKER_PY" ingestion/omdb_enrich.py 100',
+        bash_command='cd "$FLICKER_HOME" && "$FLICKER_PY" ingestion/omdb_enrich.py 900',
     )
 
     fetch_trailers = BashOperator(

@@ -27,7 +27,7 @@ from dashboard.utils.duckdb_conn import get_connection
 load_dotenv()
 
 API_BASE = "https://api.themoviedb.org/3"
-DEFAULT_TARGET = 300          # movies to fetch when no count is passed
+DEFAULT_TARGET = 10000        # movies to fetch when no count is passed (TMDB max: 500 pages × 20)
 MIN_VOTE_COUNT = 50           # skip obscure titles with too little signal
 REQUEST_TIMEOUT = 15
 
