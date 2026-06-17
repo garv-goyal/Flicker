@@ -22,7 +22,7 @@ import websockets
 from kafka import KafkaProducer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 JETSTREAM = ("wss://jetstream2.us-east.bsky.network/subscribe"
              "?wantedCollections=app.bsky.feed.post")

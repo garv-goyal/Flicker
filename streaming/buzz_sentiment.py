@@ -5,7 +5,7 @@ sentiment model built for short social text — it understands emoji, slang, cap
 and punctuation), and lands one row per comment in bronze.raw_buzz_sentiment.
 
 This turns raw comment text into a metric: a compound score in [-1, 1] and a
-positive/neutral/negative label. dbt then aggregates it per film so the dashboard
+positive/neutral/negative label. dbt then aggregates it per film so the web app
 can compare *audience enthusiasm* against *critic scores* — the buzz stream stops
 being a wall of text and becomes a signal tied to outcomes.
 
@@ -25,7 +25,7 @@ import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 # VADER's conventional thresholds for labelling a compound score.
 POS_CUTOFF = 0.05

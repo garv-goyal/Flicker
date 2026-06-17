@@ -26,7 +26,7 @@ import duckdb
 import psycopg2
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from dashboard.utils.duckdb_conn import DEFAULT_DB_PATH
+from db_conn import DEFAULT_DB_PATH
 
 PG = dict(host=os.getenv("PG_HOST", "localhost"), port=int(os.getenv("PG_PORT", "5432")),
           user=os.getenv("PG_USER", "flicker"), password=os.getenv("PG_PASSWORD", "flicker"),

@@ -19,9 +19,7 @@ kafka-python==3.0.0
 confluent-kafka==2.14.2
 websockets==16.0
 
-# --- Dashboard ---
-streamlit==1.58.0
-plotly==6.8.0
+# --- Data processing ---
 pandas==2.3.3   # pinned to latest 2.x for broad ecosystem stability (pandas 3.0 still very new)
 
 # --- NLP / sentiment (buzz enrichment) ---
@@ -29,9 +27,6 @@ vaderSentiment==3.3.2   # rule-based sentiment for short social text (local, fre
 
 # --- Newsletter ---
 resend==2.30.1
-
-# --- Text-to-SQL ---
-google-genai
 
 # --- Data simulation / utilities ---
 faker==40.23.0

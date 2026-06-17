@@ -22,7 +22,7 @@ import requests
 from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 load_dotenv()
 

@@ -1,6 +1,6 @@
 """Build the weekly newsletter HTML email.
 
-Color palette mirrors the dashboard:
+Color palette mirrors the web app:
   bg         #0A0A0F
   surface    #14141B
   surface-2  #1B1B23

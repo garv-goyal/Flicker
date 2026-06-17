@@ -8,7 +8,7 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dashboard.utils.duckdb_conn import get_connection, DEFAULT_DB_PATH
+from db_conn import get_connection, DEFAULT_DB_PATH
 
 
 def main() -> None:

@@ -2,7 +2,7 @@
     python verify_setup.py
 Confirms the DuckDB warehouse opens and the bronze/silver/gold schemas exist."""
 import sys
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 
 def main() -> int:

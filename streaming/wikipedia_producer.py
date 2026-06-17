@@ -24,7 +24,7 @@ import requests
 from kafka import KafkaProducer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 STREAM = "https://stream.wikimedia.org/v2/stream/recentchange"
 BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")

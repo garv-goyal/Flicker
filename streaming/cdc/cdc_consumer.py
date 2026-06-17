@@ -21,7 +21,7 @@ import pandas as pd
 from confluent_kafka import Consumer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
 TOPIC = "flicker_cdc.public.film_lifecycle"

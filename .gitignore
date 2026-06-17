@@ -48,9 +48,6 @@ CLAUDE.md
 AGENTS.md
 .claude/
 
-# Streamlit secrets (keep config.toml, ignore secrets.toml)
-.streamlit/secrets.toml
-
 # dbt per-user config
 warehouse/.user.yml
 

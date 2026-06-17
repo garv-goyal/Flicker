@@ -3,7 +3,7 @@ counts and Bronze freshness. Exits non-zero if any layer is empty (so Airflow
 marks the task failed). Usable locally too:  python pipeline_health.py
 """
 import sys
-from dashboard.utils.duckdb_conn import get_connection
+from db_conn import get_connection
 
 CHECKS = [
     ("bronze.raw_tmdb_movies", "bronze"),

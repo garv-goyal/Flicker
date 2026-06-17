@@ -115,7 +115,7 @@ def main():
         subscribers = get_subscribers()
 
     if not subscribers:
-        print("No active subscribers. Add some via the Subscribe page on the dashboard.")
+        print("No active subscribers. Add some via the Newsletter page on the web app.")
         return
 
     print(f"Sending to {len(subscribers)} subscriber(s) …")
