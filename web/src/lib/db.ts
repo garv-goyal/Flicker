@@ -1,8 +1,10 @@
 import path from "path";
 import { DuckDBInstance } from "@duckdb/node-api";
 
+type DuckDBConn = Awaited<ReturnType<Awaited<ReturnType<typeof DuckDBInstance.create>>["connect"]>>;
+
 let _instance: Awaited<ReturnType<typeof DuckDBInstance.create>> | null = null;
-let _conn: Awaited<ReturnType<(typeof _instance)["connect"]>> | null = null;
+let _conn: DuckDBConn | null = null;
 
 function deepConvert(value: unknown): unknown {
   if (typeof value === "bigint") return Number(value);
