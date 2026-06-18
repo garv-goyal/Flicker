@@ -1,0 +1,20 @@
+# dbt connection profile. Run dbt from the warehouse/ directory:
+#   cd warehouse && dbt run --profiles-dir .
+#
+# Mirrors the same FLICKER_USE_MOTHERDUCK switch the ingestion/streaming scripts
+# use (db_conn.py), so dbt builds the same database they just wrote into — if
+# they pointed at MotherDuck and dbt built the local file (or vice versa), the
+# Gold tables would never reflect newly-ingested data.
+flicker:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: >-
+        {%- if env_var('FLICKER_USE_MOTHERDUCK', 'false') == 'true' -%}
+        md:{{ env_var('MOTHERDUCK_DATABASE', 'flicker') }}?motherduck_token={{ env_var('MOTHERDUCK_TOKEN', '') }}
+        {%- else -%}
+        ../flicker.duckdb
+        {%- endif -%}
+      threads: 4
+      schema: main

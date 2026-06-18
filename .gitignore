@@ -10,6 +10,7 @@ venv/
 .env
 *.pem
 profiles.yml
+!warehouse/profiles.yml  # safe: no hardcoded secrets, all values via env_var()
 
 # DuckDB local warehouse
 *.duckdb
