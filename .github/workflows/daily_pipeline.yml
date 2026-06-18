@@ -1,0 +1,50 @@
+name: Daily pipeline
+
+# Mirrors orchestration/dags/flicker_daily_pipeline.py — runs in the cloud so
+# it fires even when no laptop/Docker/Airflow instance is on.
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily, same as the Airflow DAG
+  workflow_dispatch: {}    # allow manual runs from the Actions tab
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FLICKER_USE_MOTHERDUCK: "true"
+      MOTHERDUCK_TOKEN: ${{ secrets.MOTHERDUCK_TOKEN }}
+      MOTHERDUCK_DATABASE: ${{ secrets.MOTHERDUCK_DATABASE }}
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+      TMDB_API_READ_ACCESS_TOKEN: ${{ secrets.TMDB_API_READ_ACCESS_TOKEN }}
+      OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install dbt packages
+        working-directory: warehouse
+        run: dbt deps --profiles-dir .
+
+      - name: Ingest TMDB
+        run: python ingestion/tmdb_movies.py 500
+
+      - name: Enrich with OMDb
+        run: python ingestion/omdb_enrich.py 900
+
+      - name: Fetch YouTube trailers
+        run: python ingestion/youtube_trailers.py 25
+
+      - name: dbt build
+        working-directory: warehouse
+        run: dbt build --profiles-dir .
+
+      - name: Health check
+        run: python pipeline_health.py
